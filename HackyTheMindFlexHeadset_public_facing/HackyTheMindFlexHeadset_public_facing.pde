@@ -10,11 +10,6 @@
  Make an account at Xively.com, get an API KEY and a FEED ID, run the sketch and watch the magic. No need to create the channels on Xively,
  the sketch will create them automatically :-D.
  
- This is a first commit and needs to be cleaned.
- 
- Also, as soon as an error posts, you'll need to start the sketch again.
- 
- It's buggy, but fun for real.
  
  ****************/
 import processing.serial.*;
@@ -30,7 +25,6 @@ Serial serial;
 int lf = 10;	// ASCII linefeed
 
 int count=0;//count incoming packets
-String fileName="think_1";
 
 String[] incomingValues;
 
@@ -46,30 +40,31 @@ void setup() {
 
   smooth();
   //font = new ControlFont(createFont("DIN-MediumAlternate", 12), 12);
-  // Create each channel
+
   serial = new Serial(this, Serial.list()[0], 9600);	
   serial.bufferUntil(10);
 
 //  fontA = loadFont("Ziggurat-HTF-Black-32.vlw");
   // Set the font and its size (in units of pixels)
   //     textFont(fontA, 32);
-  //sendRandomVal();
+
   sendBrainData();
 }
 
-void draw() {
-
-  //awesome stuff goes here
-}
+void draw() {}
 
 void sendBrainData() {
-
+//wait a second for stuff to get going
   for (int i=0;i<1000000;i++) {  
     delay(1000000000);
     i+=1;
   }
+  
+//take 100 readings and post to Xively
   for (int j=0;j<100;j++) {
+    //load the EEG Data from your data folder
     data = loadStrings("data.txt");
+    //if you have a bad signal (data=0) or a Packet too long Error, don't post the data
     if (data[0]!="0" && data[0]!="ERROR: Packet too long") {
       feed.setStream(0, data[0]);
       //delay(1000000000);
@@ -96,7 +91,7 @@ void sendBrainData() {
       //delay(1000000000);
       j+=1;
     }
-
+//wait a second before reading the next data file
     for (int i=0;i<20;i++) {  
       delay(1000000000);
       i+=1;
@@ -104,25 +99,18 @@ void sendBrainData() {
   }
 }
 
-void sendRandomVal() {
-  float randomVal = random(1023); //create a random value
-  feed.setStream(0, randomVal); //send request (datastream id, new value)
-  println(randomVal); //look at number printed, then check your feed on cosm!
-}
-
-void keyPressed() {
-  sendRandomVal();
-}
-
 
 void serialEvent(Serial p) {
+  
+//Read the string coming from the serial port
   incomingValues = split(p.readString(), ',');
-
+//Print out the strings
   println(incomingValues);
+  
   count+=1;
-
+//save the data to your data folder - this is referenced in the loop
   saveStrings(dataPath("data.txt"), incomingValues);
-  // Add the data to the logs
+  
   if (incomingValues.length > 1) {
     packetCount++;
 
